@@ -133,8 +133,7 @@ public class NetworkHandler {
                 sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
                 dIP = packet.getHeader(ip).destination();
                 destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-
-
+                    
                 sٍEthernet  =packet.getHeader(ethernet).source();
                 sourceٍEthernet = org.jnetpcap.packet.format.FormatUtils.hexdump(sٍEthernet);
                 dٍEthernet = packet.getHeader(ethernet).destination();
@@ -143,7 +142,7 @@ public class NetworkHandler {
                 System.out.println("  *  " + sourceIP + "  *  " + destIP);
                 System.out.println("Source IP :" + sourceIP);
                 System.out.println("Destination IP :" + destIP);
-
+                System.out.println(Arrays.toString(udp.getPayload()));
             }
         }, errbuf);
 
