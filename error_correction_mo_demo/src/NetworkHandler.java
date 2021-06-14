@@ -2,6 +2,8 @@ import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.JPacketHandler;
 import org.jnetpcap.packet.PcapPacket;
+import org.jnetpcap.protocol.network.Ip4;
+import org.jnetpcap.protocol.tcpip.Udp;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,8 +28,6 @@ public class NetworkHandler {
     public byte[] rcvframe;
 
     Queue<PcapPacket> queue = new ArrayBlockingQueue<PcapPacket>(20);
-
-    String username;
 
     private NetworkHandler() {
     }
@@ -64,9 +64,9 @@ public class NetworkHandler {
             System.out.printf("#%d: %s [%s]\n", i++, device.getName(), description);
         }
 
-        /*****************************************
-         * Select network interfaces
-         *****************************************/
+        /***************************************
+         Select network interfaces
+         */
         try(Scanner scanner = new Scanner(System.in)) {
             while (true) {
                 try {
@@ -76,11 +76,9 @@ public class NetworkHandler {
                         break;
                     } else {
                         System.out.println("Incorrect, retry...");
-                        continue;
                     }
                 } catch (NumberFormatException e) {
                     System.out.println("Incorrect, retry...");
-                    continue;
                 }
             }
         }
@@ -116,13 +114,35 @@ public class NetworkHandler {
         }
     }
 
-    public byte[] receiveFrame() {
+    byte[] receiveFrame() {
         StringBuilder errbuf = new StringBuilder();
         pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
 
             // counter to count the number of packet
             // in each pcap file
-            System.out.println(packet);
+            Udp udp = new Udp();
+            Ip4 ip = new Ip4();
+            byte[] sIP = new byte[4];
+            byte[] dIP = new byte[4];
+            String sourceIP = "";
+            String destIP = "";
+
+            if(packet.hasHeader(ip) && packet.hasHeader(udp)){
+                sIP = packet.getHeader(ip).source();
+                sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
+                dIP = packet.getHeader(ip).destination();
+                destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
+
+                System.out.println("*" + sourceIP + "*" + destIP);
+                System.out.println("Source IP" + sourceIP);
+                System.out.println("Destination IP" + destIP);
+
+                if(udp.source() == 80){
+                    System.out.println("HTTP protocol");
+                } else if(udp.source() == 23) {
+                    System.out.println("Telnet protocol");
+                }
+            }
         }, errbuf);
 
         return rcvframe;
