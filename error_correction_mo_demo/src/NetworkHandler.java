@@ -1,15 +1,5 @@
 
 
-
-/**
- * TLS-Attacker - A Modular Penetration Testing Framework for TLS
- *
- * Copyright 2014-2016 Ruhr University Bochum / Hackmanit GmbH
- *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
- */
-
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
@@ -23,12 +13,7 @@ import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
-/**
- * Networkhandler to open Interface, send/receive Frames on Data Link Layer,
- * close the connection
- *
- * @author Felix Lange <flx.lange@gmail.com>
- */
+
 public class NetworkHandler {
     private static NetworkHandler networkhandler = new NetworkHandler();
 
@@ -107,13 +92,6 @@ public class NetworkHandler {
         System.out.printf("\nChoosing '%s' on your behalf:\n",
                 (device.getDescription() != null) ? device.getDescription() : device.getName());
 
-        // Username Request
-//        System.out.println("Please insert username: ");
-//        Scanner sc = new Scanner(System.in);
-//        username = sc.nextLine();
-
-
-
         // Initialize Network-Interface
 
         int snaplen = 64 * 1024; // Capture all packets, no trucation
@@ -149,13 +127,13 @@ public class NetworkHandler {
             // Byte-Array for Frames
             rcvframe = packet.getByteArray(0, packet.size());
 
-            // PcapPacket permanent = new PcapPacket(packet);
+             PcapPacket permanent = new PcapPacket(packet);
 
             // IF EAPOL Request Frame?
             if ((rcvframe[12] == -120) && (rcvframe[13] == -114)
                     && (rcvframe[18] == 1 || rcvframe[18] == 3 || rcvframe[18] == 4)) {
                 // Put in Queue
-                // queue.offer(permanent);
+                 queue.offer(permanent);
                 // Leave the Loop
                 pcap.breakloop();
             }
