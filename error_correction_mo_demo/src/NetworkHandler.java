@@ -116,38 +116,34 @@ public class NetworkHandler {
         StringBuilder errbuf = new StringBuilder();
         pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
 
-            // counter to count the number of packet
-            // in each pcap file
             Udp udp = new Udp();
             Ip4 ip = new Ip4();
-            byte[] sIP = new byte[4];
-            byte[] dIP = new byte[4];
-            byte[] sٍEthernet = new byte[8];
-            byte[] dٍEthernet = new byte[8];
+            Ethernet  ethernet = new Ethernet();
+            byte[] sIP;
+            byte[] dIP;
+            byte[] sٍEthernet;
+            byte[] dٍEthernet;
             String sourceIP = "";
             String destIP = "";
             String sourceٍEthernet= "";
             String destEthernet = "";
-            Ethernet  ethernet = new Ethernet();
 
             if(packet.hasHeader(ip) && packet.hasHeader(udp) && packet.hasHeader(ethernet)){
                 sIP = packet.getHeader(ip).source();
                 sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
                 dIP = packet.getHeader(ip).destination();
                 destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-//                sourceٍEthernet = org.jnetpcap.packet.format.FormatUtils.ip(sٍEthernet);
-//                destEthernet = org.jnetpcap.packet.format.FormatUtils.ip(dٍEthernet);
 
-//                System.out.println("Ethernet " + sourceٍEthernet +"    " +destEthernet);
+
+                sٍEthernet  =packet.getHeader(ethernet).source();
+                sourceٍEthernet = org.jnetpcap.packet.format.FormatUtils.hexdump(sٍEthernet);
+                dٍEthernet = packet.getHeader(ethernet).destination();
+                destEthernet  = org.jnetpcap.packet.format.FormatUtils.hexdump(dٍEthernet);
+                System.out.println("Ethernet " + sourceٍEthernet +"    " +destEthernet);
                 System.out.println("  *  " + sourceIP + "  *  " + destIP);
                 System.out.println("Source IP :" + sourceIP);
                 System.out.println("Destination IP :" + destIP);
 
-                if(udp.source() == 80){
-                    System.out.println("HTTP protocol");
-                } else if(udp.source() == 23) {
-//                    System.out.println("Telnet protocol");////////////////////////////////////////////////
-                }
             }
         }, errbuf);
 
