@@ -146,7 +146,7 @@ public class NetworkHandler {
                 if(udp.source() == 80){
                     System.out.println("HTTP protocol");
                 } else if(udp.source() == 23) {
-                    System.out.println("Telnet protocol");
+//                    System.out.println("Telnet protocol");////////////////////////////////////////////////
                 }
             }
         }, errbuf);
