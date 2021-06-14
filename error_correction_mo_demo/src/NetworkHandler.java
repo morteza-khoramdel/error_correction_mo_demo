@@ -2,14 +2,12 @@ import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.JPacketHandler;
 import org.jnetpcap.packet.PcapPacket;
+import org.jnetpcap.protocol.lan.Ethernet;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Udp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
@@ -124,18 +122,26 @@ public class NetworkHandler {
             Ip4 ip = new Ip4();
             byte[] sIP = new byte[4];
             byte[] dIP = new byte[4];
+            byte[] sٍEthernet = new byte[8];
+            byte[] dٍEthernet = new byte[8];
             String sourceIP = "";
             String destIP = "";
+            String sourceٍEthernet= "";
+            String destEthernet = "";
+            Ethernet  ethernet = new Ethernet();
 
-            if(packet.hasHeader(ip) && packet.hasHeader(udp)){
+            if(packet.hasHeader(ip) && packet.hasHeader(udp) && packet.hasHeader(ethernet)){
                 sIP = packet.getHeader(ip).source();
                 sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
                 dIP = packet.getHeader(ip).destination();
                 destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
+//                sourceٍEthernet = org.jnetpcap.packet.format.FormatUtils.ip(sٍEthernet);
+//                destEthernet = org.jnetpcap.packet.format.FormatUtils.ip(dٍEthernet);
 
-                System.out.println("*" + sourceIP + "*" + destIP);
-                System.out.println("Source IP" + sourceIP);
-                System.out.println("Destination IP" + destIP);
+//                System.out.println("Ethernet " + sourceٍEthernet +"    " +destEthernet);
+                System.out.println("  *  " + sourceIP + "  *  " + destIP);
+                System.out.println("Source IP :" + sourceIP);
+                System.out.println("Destination IP :" + destIP);
 
                 if(udp.source() == 80){
                     System.out.println("HTTP protocol");
