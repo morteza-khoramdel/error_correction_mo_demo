@@ -1,9 +1,7 @@
-
-
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
+import org.jnetpcap.packet.JPacketHandler;
 import org.jnetpcap.packet.PcapPacket;
-import org.jnetpcap.packet.PcapPacketHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -119,27 +117,13 @@ public class NetworkHandler {
     }
 
     public byte[] receiveFrame() {
+        StringBuilder errbuf = new StringBuilder();
+        pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
 
-        // Initialize PacketHandler for listening
-
-        PcapPacketHandler<Queue<PcapPacket>> handler = (packet, queue) -> {
-
-            // Byte-Array for Frames
-            rcvframe = packet.getByteArray(0, packet.size());
-
-             PcapPacket permanent = new PcapPacket(packet);
-
-            // IF EAPOL Request Frame?
-            if ((rcvframe[12] == -120) && (rcvframe[13] == -114)
-                    && (rcvframe[18] == 1 || rcvframe[18] == 3 || rcvframe[18] == 4)) {
-                // Put in Queue
-                 queue.offer(permanent);
-                // Leave the Loop
-                pcap.breakloop();
-            }
-        };
-
-        pcap.loop(100, handler, queue);
+            // counter to count the number of packet
+            // in each pcap file
+            System.out.println(packet);
+        }, errbuf);
 
         return rcvframe;
     }
