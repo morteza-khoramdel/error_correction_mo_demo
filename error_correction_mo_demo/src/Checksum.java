@@ -1,9 +1,9 @@
 public class Checksum {
     public static short calculateChecksum(byte[] strb)
     {
-        // compute over UDP Header and Payload, except the last bytes which
-        // don't
-        // fall on an int boundary
+        // Note: For UDP checksums all checksum is zero depending on itself
+        // and for Header IP checksums only checksum is calculated from
+        // the header for zero checksum.
         long tempSum = 0;
         short finalSum = 0;
         short finvers = 0;

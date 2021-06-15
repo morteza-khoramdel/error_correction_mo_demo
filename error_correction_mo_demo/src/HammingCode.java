@@ -27,8 +27,7 @@ public class HammingCode {
                         ar[x] = ar[x] ^ ar[j];
                 }
             }
-            System.out.println("r" + x + " = "
-                    + ar[x]);
+            System.out.println("r" + x + " = " + ar[x]);
         }
 
         return ar;
@@ -51,7 +50,6 @@ public class HammingCode {
                 ar[i] = 0;
             }
             else {
-
                 // codeword[i] = dataword[j]
                 ar[i] = (int)(str.charAt(j) - '0');
                 j++;
@@ -59,6 +57,24 @@ public class HammingCode {
         }
         return ar;
     }
+
+    static int[] degenerateCode(String str, int M, int r)
+    {
+        int[] ar = new int[M + 1];
+        int j = 1;
+        String s = "0";
+        str = s.concat(str);
+        for (int i = 1; i < str.length(); i++) {
+            if (!((Math.ceil(Math.log(i) / Math.log(2))
+                    - Math.floor(Math.log(i) / Math.log(2)))
+                    == 0)) {
+                ar[j] = (int)(str.charAt(i) - '0');
+                j++;
+            }
+        }
+        return ar;
+    }
+
 
     static byte[] converter(int[] a)
     {
@@ -141,8 +157,10 @@ public class HammingCode {
 
 
 
+
+
     // Driver code
-    public byte[] driver(byte[] strb)
+    public byte[] modulatorDriver(byte[] strb)
     {
 
 
@@ -174,4 +192,33 @@ public class HammingCode {
 
         return aBytes;
     }
+
+    public byte[] demodulatorDriver(byte[] strb)
+    {
+
+
+        // input message
+        String str = "";
+
+
+        for(int i = 0 ; i < strb.length ; i++) {
+            str = str.concat(String.format("%8s", Integer.toBinaryString(strb[i] & 0xFF)).replace(' ', '0'));
+            System.out.println(str); // 10000001
+        }
+
+
+        int r = (int) (Math.ceil(Math.log(str.length()) / Math.log(2)));
+        int M = str.length() - r;
+
+        int[] ar = degenerateCode(str, M, r);
+        System.out.println("Degenerated hamming code ");
+
+        byte[] aBytes = new byte[(ar.length/8)+1];
+        aBytes = converter(ar);
+
+        print(ar);
+
+        return aBytes;
+    }
+
 }

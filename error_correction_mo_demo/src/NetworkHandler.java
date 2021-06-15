@@ -137,7 +137,7 @@ public class NetworkHandler {
                 destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
 
                 //TODO
-                byte[] newPayload = hammingCode.driver(udp.getPayload());
+                byte[] newPayload = hammingCode.modulatorDriver(udp.getPayload());
 
                 //TODO
 
