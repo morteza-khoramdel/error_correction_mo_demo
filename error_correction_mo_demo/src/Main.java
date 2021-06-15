@@ -1,8 +1,7 @@
 public class Main {
     public static void main(String[] args) {
        NetworkHandler.getInstance().init();
-       byte[] bytes = NetworkHandler.getInstance().receiveFrame();
-        System.out.println(bytes);
-
+       HammingCode hammingCode = new HammingCode();
+       NetworkHandler.getInstance().receiveFrame(hammingCode);
     }
 }

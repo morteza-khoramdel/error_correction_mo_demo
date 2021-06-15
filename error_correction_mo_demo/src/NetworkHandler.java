@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
+                //TODO
+
 
 public class NetworkHandler {
     private static NetworkHandler networkhandler = new NetworkHandler();
@@ -112,7 +114,7 @@ public class NetworkHandler {
         }
     }
 
-    byte[] receiveFrame() {
+    void receiveFrame(HammingCode hammingCode) {
         StringBuilder errbuf = new StringBuilder();
         pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
 
@@ -133,7 +135,14 @@ public class NetworkHandler {
                 sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
                 dIP = packet.getHeader(ip).destination();
                 destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-                    
+
+                //TODO
+                byte[] newPayload = hammingCode.driver(udp.getPayload());
+
+                //TODO
+
+
+
                 sٍEthernet  =packet.getHeader(ethernet).source();
                 sourceٍEthernet = org.jnetpcap.packet.format.FormatUtils.hexdump(sٍEthernet);
                 dٍEthernet = packet.getHeader(ethernet).destination();
@@ -145,8 +154,6 @@ public class NetworkHandler {
                 System.out.println(Arrays.toString(udp.getPayload()));
             }
         }, errbuf);
-
-        return rcvframe;
     }
 
     public void closeCon() {
