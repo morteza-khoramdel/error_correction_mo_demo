@@ -64,6 +64,49 @@ public class HammingCode {
         int j = 1;
         String s = "0";
         str = s.concat(str);
+        int error = 0;
+        int counter = 0;
+
+        int parities[] = new int[r];
+//detect fault
+        for (int i = 0; i < r; i++) {
+            int position = (int)Math.pow(2,i);
+            for (int k = position; k < str.length(); k += 2 * position) {
+                for(int y = k ; y < k + position ; y++){
+                    if(y < str.length()) {
+                        parities[i] = parities[i] ^ Character.getNumericValue(str.charAt(y));
+                    }
+                }
+            }
+        }
+
+        for (int i = 0 ; i < r ; i++){
+            if(parities[i] == 0){
+                counter++;
+            }else {
+                break;
+            }
+        }
+        if(counter == r){
+            // we are good
+            error = 0;
+        }else{
+            // :)
+            int epos = 0;
+            for(int i = r-1 ; i > -1 ; i--){
+                epos = epos + (parities[i] * (int)Math.pow(2,i));
+            }
+            error = epos;
+        }
+
+        if(error != 0){
+            if (str.charAt(error) == '0'){
+                str = str.substring(0, error) + '1' + str.substring(error + 1);
+            }else {
+                str = str.substring(0, error) + '0' + str.substring(error + 1);
+            }
+        }
+        System.out.println(str);
         for (int i = 1; i < str.length(); i++) {
             if (!((Math.ceil(Math.log(i) / Math.log(2))
                     - Math.floor(Math.log(i) / Math.log(2)))
@@ -72,6 +115,7 @@ public class HammingCode {
                 j++;
             }
         }
+
         return ar;
     }
 
