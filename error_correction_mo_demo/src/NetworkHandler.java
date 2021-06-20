@@ -7,8 +7,11 @@ import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Udp;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.*;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
@@ -117,7 +120,7 @@ public class NetworkHandler {
 
     void receiveFrameAndSendFrame(HammingCode hammingCode) {
         StringBuilder errbuf = new StringBuilder();
-        pcap.loop(1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
+        pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
 
             Udp udp = new Udp();
             Ip4 ip = new Ip4();
@@ -136,33 +139,61 @@ public class NetworkHandler {
                 sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
                 dIP = packet.getHeader(ip).destination();
                 destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-
-                //TODO
+                System.out.println(packet);
                 byte[] newPayload = hammingCode.modulatorDriver(udp.getPayload());
-                int temp = 0;
-                temp= ip.length() + (newPayload.length - udp.getPayload().length);
-                byte[] ipTotal ;
-                ipTotal = bigIntToByteArray(temp);
-                packet.setByteArray(16 , ipTotal);
+
+                ByteBuffer byteBuffers = ByteBuffer.allocate(packet.size() + (newPayload.length - udp.getPayload().length));
+                packet.setByteBuffer(packet.size() + (newPayload.length - udp.getPayload().length) ,byteBuffers);
+                packet.setSize(packet.size() + (newPayload.length - udp.getPayload().length));
+                //udp payload
                 packet.setByteArray(42, newPayload);
-                byte [] headerCheckSumIP =ip.getByteArray(14,33);
-                headerCheckSumIP[24] = 0;
-                headerCheckSumIP[25] = 0;
-                short tempHeader = Checksum.calculateChecksum(headerCheckSumIP);
+                //udp payload
 
-                //TODO
-//                sendFrame(packet.getByteArray(0, packet.getTotalSize() - 1));
-                pcap.sendPacket(packet);
 
-                sٍEthernet = packet.getHeader(ethernet).source();
-                sourceٍEthernet = org.jnetpcap.packet.format.FormatUtils.hexdump(sٍEthernet);
-                dٍEthernet = packet.getHeader(ethernet).destination();
-                destEthernet = org.jnetpcap.packet.format.FormatUtils.hexdump(dٍEthernet);
-                System.out.println("Ethernet " + sourceٍEthernet + "    " + destEthernet);
-                System.out.println("  *  " + sourceIP + "  *  " + destIP);
-                System.out.println("Source IP :" + sourceIP);
-                System.out.println("Destination IP :" + destIP);
-                System.out.println(Arrays.toString(udp.getPayload()));
+                //ip total
+                short tempIpTotal = 0;
+                tempIpTotal = (short) (ip.length() + (newPayload.length - udp.getPayload().length));
+                byte[] ipTotal;
+                ipTotal = ByteBuffer.allocate(2).putShort(tempIpTotal).array();
+                packet.setByteArray(16, ipTotal);
+                //ip total
+
+                //ip header check sum
+                byte[] oldChecksumIP = packet.getByteArray(14, 33);
+                oldChecksumIP[24 - 14] = 0;
+                oldChecksumIP[25 - 14] = 0;
+                short newCheckSumIP = Checksum.calculateChecksum(oldChecksumIP);
+                byte[] byteNewCheckSumIP = ByteBuffer.allocate(2).putShort(newCheckSumIP).array();
+                packet.setByteArray(14, byteNewCheckSumIP);
+
+                //ip header check sum
+
+
+                //udp total
+                short tempUDPTotal;
+                tempUDPTotal = (short) (ip.length() + (newPayload.length - udp.getPayload().length));
+
+                byte[] udpTotal;
+                udpTotal = ByteBuffer.allocate(2).putShort(tempUDPTotal).array();
+                packet.setByteArray(38, udpTotal);
+                //udp total
+
+                //udp header check sum
+                System.out.println("totlal size is : " + packet.size());
+                byte[] oldChecksumUdp;
+                oldChecksumUdp = packet.getByteArray(34, packet.size() );
+                oldChecksumUdp[40 - 34] = 0;
+                oldChecksumUdp[41 - 34] = 0;
+                short newCheckSumUdp = Checksum.calculateChecksum(oldChecksumUdp);
+                byte[] byteNewCheckSumUdp = ByteBuffer.allocate(2).putShort(newCheckSumUdp).array();
+                packet.setByteArray(40, byteNewCheckSumUdp);
+
+                //udp header check sum
+                System.out.println(packet);
+
+
+
+
             }
         }, errbuf);
     }
@@ -172,8 +203,6 @@ public class NetworkHandler {
         pcap.close();
 
     }
-    private byte[] bigIntToByteArray( final int i ) {
-        BigInteger bigInt = BigInteger.valueOf(i);
-        return bigInt.toByteArray();
-    }
+
+
 }

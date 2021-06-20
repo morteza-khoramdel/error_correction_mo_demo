@@ -214,7 +214,7 @@ public class HammingCode {
 
         for(int i = 0 ; i < strb.length ; i++) {
             str = str.concat(String.format("%8s", Integer.toBinaryString(strb[i] & 0xFF)).replace(' ', '0'));
-            System.out.println(str); // 10000001
+//            System.out.println(str); // 10000001
         }
 
         int M = str.length();
