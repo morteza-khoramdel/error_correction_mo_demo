@@ -145,9 +145,10 @@ public class NetworkHandler {
                 ipTotal = bigIntToByteArray(temp);
                 packet.setByteArray(16 , ipTotal);
                 packet.setByteArray(42, newPayload);
-                byte [] headerCheckSumIP ;
-//                packet.setByteArray();
-                short tempHeader = Checksum.calculateChecksum(ip.getByteArray(14,33));
+                byte [] headerCheckSumIP =ip.getByteArray(14,33);
+                headerCheckSumIP[24] = 0;
+                headerCheckSumIP[25] = 0;
+                short tempHeader = Checksum.calculateChecksum(headerCheckSumIP);
 
                 //TODO
 //                sendFrame(packet.getByteArray(0, packet.getTotalSize() - 1));
