@@ -7,11 +7,12 @@ import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Udp;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
-                //TODO
+//TODO
 
 
 public class NetworkHandler {
@@ -67,7 +68,7 @@ public class NetworkHandler {
         /***************************************
          Select network interfaces
          */
-        try(Scanner scanner = new Scanner(System.in)) {
+        try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
                 try {
                     System.out.print("Which [number] of Network-Adapter to use: ");
@@ -114,23 +115,23 @@ public class NetworkHandler {
         }
     }
 
-    void receiveFrame(HammingCode hammingCode) {
+    void receiveFrameAndSendFrame(HammingCode hammingCode) {
         StringBuilder errbuf = new StringBuilder();
-        pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
+        pcap.loop(1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
 
             Udp udp = new Udp();
             Ip4 ip = new Ip4();
-            Ethernet  ethernet = new Ethernet();
+            Ethernet ethernet = new Ethernet();
             byte[] sIP;
             byte[] dIP;
             byte[] sٍEthernet;
             byte[] dٍEthernet;
             String sourceIP = "";
             String destIP = "";
-            String sourceٍEthernet= "";
+            String sourceٍEthernet = "";
             String destEthernet = "";
 
-            if(packet.hasHeader(ip) && packet.hasHeader(udp) && packet.hasHeader(ethernet)){
+            if (packet.hasHeader(ip) && packet.hasHeader(udp) && packet.hasHeader(ethernet)) {
                 sIP = packet.getHeader(ip).source();
                 sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
                 dIP = packet.getHeader(ip).destination();
@@ -138,16 +139,25 @@ public class NetworkHandler {
 
                 //TODO
                 byte[] newPayload = hammingCode.modulatorDriver(udp.getPayload());
+                int temp = 0;
+                temp= ip.length() + (newPayload.length - udp.getPayload().length);
+                byte[] ipTotal ;
+                ipTotal = bigIntToByteArray(temp);
+                packet.setByteArray(16 , ipTotal);
+                packet.setByteArray(42, newPayload);
+                byte [] headerCheckSumIP ;
+//                packet.setByteArray();
+                short tempHeader = Checksum.calculateChecksum(ip.getByteArray(14,33));
 
                 //TODO
+//                sendFrame(packet.getByteArray(0, packet.getTotalSize() - 1));
+                pcap.sendPacket(packet);
 
-
-
-                sٍEthernet  =packet.getHeader(ethernet).source();
+                sٍEthernet = packet.getHeader(ethernet).source();
                 sourceٍEthernet = org.jnetpcap.packet.format.FormatUtils.hexdump(sٍEthernet);
                 dٍEthernet = packet.getHeader(ethernet).destination();
-                destEthernet  = org.jnetpcap.packet.format.FormatUtils.hexdump(dٍEthernet);
-                System.out.println("Ethernet " + sourceٍEthernet +"    " +destEthernet);
+                destEthernet = org.jnetpcap.packet.format.FormatUtils.hexdump(dٍEthernet);
+                System.out.println("Ethernet " + sourceٍEthernet + "    " + destEthernet);
                 System.out.println("  *  " + sourceIP + "  *  " + destIP);
                 System.out.println("Source IP :" + sourceIP);
                 System.out.println("Destination IP :" + destIP);
@@ -161,5 +171,8 @@ public class NetworkHandler {
         pcap.close();
 
     }
-
+    private byte[] bigIntToByteArray( final int i ) {
+        BigInteger bigInt = BigInteger.valueOf(i);
+        return bigInt.toByteArray();
+    }
 }
