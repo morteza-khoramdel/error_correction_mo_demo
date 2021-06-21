@@ -14,7 +14,7 @@ public class Modulation extends Thread {
         this.hammingCode = hammingCode;
     }
 
-    private void receiveFrameAndModulation(HammingCode hammingCode) {
+    private synchronized void receiveFrameAndModulation(HammingCode hammingCode) {
         StringBuilder errbuf = new StringBuilder();
         NetworkHandler.getInstance().pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
             Udp udp = new Udp();

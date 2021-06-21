@@ -1,9 +1,11 @@
 public class Main {
     public static void main(String[] args) {
-       NetworkHandler.getInstance().init();
-       HammingCode hammingCode = new HammingCode();
-       Modulation modulation = new Modulation(hammingCode);
-       modulation.run();
+        NetworkHandler.getInstance().init();
+        HammingCode hammingCode = new HammingCode();
+        Modulation modulation = new Modulation(hammingCode);
+        modulation.run();
+        DeModulation deModulation = new DeModulation(hammingCode);
+        deModulation.run();
 
     }
 }
