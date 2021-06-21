@@ -58,8 +58,6 @@ public class DeModulation extends Thread {
 
                     //ip header check sum
                     byte[] oldChecksumIP = packet.getByteArray(14, 33);
-                    oldChecksumIP[24 - 14] = 0;
-                    oldChecksumIP[25 - 14] = 0;
                     boolean newCheckSumIP = Checksum.checkChecksum(oldChecksumIP);
                     if(!newCheckSumIP) {
                         //drop packet
@@ -82,8 +80,6 @@ public class DeModulation extends Thread {
                     System.out.println("totlal size is : " + packet.size());
                     byte[] oldChecksumUdp;
                     oldChecksumUdp = packet.getByteArray(34, packet.size() );
-                    oldChecksumUdp[40 - 34] = 0;
-                    oldChecksumUdp[41 - 34] = 0;
                     boolean newCheckSumUdp = Checksum.checkChecksum(oldChecksumUdp);
                     if(!newCheckSumUdp){
                         //drop packet
