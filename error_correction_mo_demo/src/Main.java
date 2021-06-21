@@ -3,7 +3,7 @@ public class Main {
         NetworkHandler.getInstance().init();
         HammingCode hammingCode = new HammingCode();
         Modulation modulation = new Modulation(hammingCode);
-        modulation.run();
+        modulation.run()    ;
         DeModulation deModulation = new DeModulation(hammingCode);
         deModulation.run();
 

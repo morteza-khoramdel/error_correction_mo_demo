@@ -1,18 +1,14 @@
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapIf;
-import org.jnetpcap.packet.JPacketHandler;
-import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.protocol.lan.Ethernet;
-import org.jnetpcap.protocol.network.Ip4;
-import org.jnetpcap.protocol.tcpip.Udp;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Scanner;
-import java.util.concurrent.ArrayBlockingQueue;
 
 
 //TODO
@@ -20,28 +16,27 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class NetworkHandler {
     private static NetworkHandler networkhandler = new NetworkHandler();
-
+    FileWriter myWriter;
     Pcap pcap;
 
-    public byte[] dst_mac = EapConstants.BROADCAST_ADDRESS;
 
     public byte[] src_mac;
 
-    public byte[] frametype = EapConstants.ETHERTYPE_EAP;
-
-    public byte[] rcvframe;
-
-    Queue<PcapPacket> queue = new ArrayBlockingQueue<PcapPacket>(20);
 
     private NetworkHandler() {
     }
 
-    public static NetworkHandler getInstance() {
+    static NetworkHandler getInstance() {
         return networkhandler;
     }
 
-    public void init() {
-
+    void init() {
+        File myError = new File("myError.txt");
+        try {
+            myWriter = new FileWriter("myError.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         List<PcapIf> alldevs = new ArrayList<PcapIf>(); // Will be filled with
         // NICs
         StringBuilder errbuf = new StringBuilder(); // For any error msgs
@@ -107,104 +102,23 @@ public class NetworkHandler {
 
     }
 
-    public void sendFrame(byte[] frame) {
+    void sendFrame(byte[] frame, Ethernet ethernet) {
 
         // create Ethernet Header
-        frame = ArrayConverter.concatenate(dst_mac, src_mac, frametype, frame);
-
+        byte[] type = ByteBuffer.allocate(2).putShort((short) ethernet.type()).array();
+        frame = ArrayConverter.concatenate(ethernet.destination(), ethernet.source(), type, frame);
         // Send EAPOL-Frame
         if (pcap.sendPacket(frame) != Pcap.OK) {
             System.err.println(pcap.getErr());
         }
     }
 
-    void receiveFrameAndSendFrame(HammingCode hammingCode) {
-        StringBuilder errbuf = new StringBuilder();
-        pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
 
-            Udp udp = new Udp();
-            Ip4 ip = new Ip4();
-            Ethernet ethernet = new Ethernet();
-            byte[] sIP;
-            byte[] dIP;
-            byte[] sٍEthernet;
-            byte[] dٍEthernet;
-            String sourceIP = "";
-            String destIP = "";
-            String sourceٍEthernet = "";
-            String destEthernet = "";
-
-            if (packet.hasHeader(ip) && packet.hasHeader(udp) && packet.hasHeader(ethernet)) {
-                sIP = packet.getHeader(ip).source();
-                sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
-                dIP = packet.getHeader(ip).destination();
-                destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
-                System.out.println(packet);
-                byte[] newPayload = hammingCode.modulatorDriver(udp.getPayload());
-
-                ByteBuffer byteBuffers = ByteBuffer.allocate(packet.size() + (newPayload.length - udp.getPayload().length));
-                packet.setByteBuffer(packet.size() + (newPayload.length - udp.getPayload().length) ,byteBuffers);
-                packet.setSize(packet.size() + (newPayload.length - udp.getPayload().length));
-                //udp payload
-                packet.setByteArray(42, newPayload);
-                //udp payload
-
-
-                //ip total
-                short tempIpTotal = 0;
-                tempIpTotal = (short) (ip.length() + (newPayload.length - udp.getPayload().length));
-                byte[] ipTotal;
-                ipTotal = ByteBuffer.allocate(2).putShort(tempIpTotal).array();
-                packet.setByteArray(16, ipTotal);
-                //ip total
-
-                //ip header check sum
-                byte[] oldChecksumIP = packet.getByteArray(14, 33);
-                oldChecksumIP[24 - 14] = 0;
-                oldChecksumIP[25 - 14] = 0;
-                short newCheckSumIP = Checksum.calculateChecksum(oldChecksumIP);
-                byte[] byteNewCheckSumIP = ByteBuffer.allocate(2).putShort(newCheckSumIP).array();
-                packet.setByteArray(14, byteNewCheckSumIP);
-
-                //ip header check sum
-
-
-                //udp total
-                short tempUDPTotal;
-                tempUDPTotal = (short) (ip.length() + (newPayload.length - udp.getPayload().length));
-
-                byte[] udpTotal;
-                udpTotal = ByteBuffer.allocate(2).putShort(tempUDPTotal).array();
-                packet.setByteArray(38, udpTotal);
-                //udp total
-
-                //udp header check sum
-                System.out.println("totlal size is : " + packet.size());
-                byte[] oldChecksumUdp;
-                oldChecksumUdp = packet.getByteArray(34, packet.size() );
-                oldChecksumUdp[40 - 34] = 0;
-                oldChecksumUdp[41 - 34] = 0;
-                short newCheckSumUdp = Checksum.calculateChecksum(oldChecksumUdp);
-                byte[] byteNewCheckSumUdp = ByteBuffer.allocate(2).putShort(newCheckSumUdp).array();
-                packet.setByteArray(40, byteNewCheckSumUdp);
-
-                //udp header check sum
-                System.out.println(packet);
-
-
-
-
-            }
-        }, errbuf);
+    byte[] getBytes(byte[] bytesA, int start, int end) {
+        byte[] bytesFinal = new byte[end - start];
+        System.arraycopy(bytesA, start, bytesFinal, 0, bytesFinal.length);
+        return bytesFinal;
     }
-
-    public void closeCon() {
-
-        pcap.close();
-
-    }
-
-
 
 
 }
