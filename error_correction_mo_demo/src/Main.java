@@ -2,6 +2,8 @@ public class Main {
     public static void main(String[] args) {
        NetworkHandler.getInstance().init();
        HammingCode hammingCode = new HammingCode();
-       NetworkHandler.getInstance().receiveFrameAndSendFrame(hammingCode);
+       Modulation modulation = new Modulation(hammingCode);
+       modulation.run();
+
     }
 }
