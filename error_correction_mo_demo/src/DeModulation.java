@@ -5,6 +5,7 @@ import org.jnetpcap.protocol.tcpip.Udp;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.zip.CRC32;
 
 public class DeModulation extends Thread {
 
@@ -40,16 +41,23 @@ public class DeModulation extends Thread {
                     destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
                     System.out.println(packet);
 
+////////////////////////////////////////////////////////////////////////////Specify the byteBuffers in demodulator
+                    //crc for demodulation
+                    CRC32 crc = new CRC32();
+                    crc.update(byteBuffers);
 
+                    byte[] crcBytes = longToBytes(crc.getValue());
+
+                    System.arraycopy(crcBytes, 0, byteBuffers, packet.size() + append, crcBytes.length);
+                    if(crc.getValue() == 0){
+                        System.out.println("Continue");
+                    }else {
+                        System.out.println("Packet Droped");
+
+                    }
+/////////////////////////////////////////////////////////////////////////////
                     byte[] packetBytes = NetworkHandler.getInstance().getBytes(packet.getByteArray(0, packet.size()), 0, packet.size());
-                    //CRC
-                    CRC crc = new CRC();
-//                    boolean isCorrect = crc.deCrcDriver(packetBytes, crcString);
-//                    if (!isCorrect) {
-//                        packet = null;
-//                    }
-                    //CRC
-                    byte[] crcBytes = ArrayConverter.stringToBinary(crcString);
+
                     byte[] mainPayload = new byte[udp.getPayloadLength() - crcBytes.length];
                     System.arraycopy(udp.getPayload(), 0, mainPayload, 0, mainPayload.length);
 
@@ -118,6 +126,11 @@ public class DeModulation extends Thread {
         }
     }
 
+    public byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
     @Override
     public void run() {
         super.run();

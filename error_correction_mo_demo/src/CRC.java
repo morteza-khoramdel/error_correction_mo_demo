@@ -3,8 +3,7 @@ public class CRC {
     private String xorOper(String temp, String g) {
         int j;
         int k;
-        int i;
-        for (i = 0; i < temp.length(); i++) {
+        for (int i = 0; i < temp.length(); i++) {
             j = 0;
             k = i;
             //check whether it is divisible or not
@@ -81,4 +80,20 @@ public class CRC {
             System.out.print("\n Since Remainder Is Not 0 Hence Message Transmitted From Sender To Receiver Contains Error");
         return rem;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

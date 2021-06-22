@@ -5,6 +5,7 @@ import org.jnetpcap.protocol.tcpip.Udp;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.zip.CRC32;
 
 public class Modulation extends Thread {
     private int counter = 0;
@@ -91,8 +92,11 @@ public class Modulation extends Thread {
 
 
                     //CRC
-                    CRC crc = new CRC();
-                    byte[] crcBytes = ArrayConverter.stringToBinary(crc.crcDriver(byteBuffers, crcString));
+                    CRC32 crc = new CRC32();
+                    crc.update(byteBuffers);
+
+                    byte[] crcBytes = longToBytes(crc.getValue());
+
                     System.arraycopy(crcBytes, 0, byteBuffers, packet.size() + append, crcBytes.length);
                     //CRC
                     NetworkHandler.getInstance().sendFrame(byteBuffers, ethernet);
@@ -119,6 +123,12 @@ public class Modulation extends Thread {
         }
     }
 
+
+    public byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
     @Override
     public void run() {
         super.run();
