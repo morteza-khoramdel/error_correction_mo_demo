@@ -17,7 +17,7 @@ public class DeModulation extends Thread {
         this.hammingCode = hammingCode;
     }
 
-    private synchronized void deModulationAndSendUpper() {
+    private  void deModulationAndSendUpper() {
         StringBuilder errbuf = new StringBuilder();
         NetworkHandler.getInstance().pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
             Udp udp = new Udp();
@@ -32,6 +32,7 @@ public class DeModulation extends Thread {
 
 
                 if (packet.hasHeader(ip) && packet.hasHeader(udp) && packet.hasHeader(ethernet)) {
+                    System.out.println("*********************************DeModulation*************************************");
                     counter++;
                     sIP = packet.getHeader(ip).source();
                     sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);
@@ -41,57 +42,62 @@ public class DeModulation extends Thread {
 
 
                     byte[] packetBytes = NetworkHandler.getInstance().getBytes(packet.getByteArray(0, packet.size()), 0, packet.size());
-                    byte[] newPayload = hammingCode.demodulatorDriver(udp.getPayload());
-                    int append = (newPayload.length - udp.getPayload().length);
-                    byte[] byteBuffers = new byte[packet.size() - append - crcString.length() + 1];
+                    //CRC
+                    CRC crc = new CRC();
+//                    boolean isCorrect = crc.deCrcDriver(packetBytes, crcString);
+//                    if (!isCorrect) {
+//                        packet = null;
+//                    }
+                    //CRC
+                    byte[] crcBytes = ArrayConverter.stringToBinary(crcString);
+                    byte[] mainPayload = new byte[udp.getPayloadLength() - crcBytes.length];
+                    System.arraycopy(udp.getPayload(), 0, mainPayload, 0, mainPayload.length);
+
+                    byte[] newPayload = hammingCode.demodulatorDriver(mainPayload);
+                    int append = (mainPayload.length - newPayload.length);
+                    byte[] byteBuffers = new byte[mainPayload.length - append];
+
                     //udp payload
                     System.arraycopy(newPayload, 0, byteBuffers, 42, newPayload.length);
                     //udp payload
 
-
                     //ip total
                     short tempIpTotal = 0;
-                    tempIpTotal = (short) (ip.length() - (newPayload.length - udp.getPayload().length));
+                    tempIpTotal = (short) (ip.length() + (mainPayload.length - newPayload.length));
                     byte[] ipTotal;
                     ipTotal = ByteBuffer.allocate(2).putShort(tempIpTotal).array();
-                    packet.setByteArray(16, ipTotal);
+                    System.arraycopy(ipTotal, 0, byteBuffers, 16, ipTotal.length);
                     //ip total
 
+
                     //ip header check sum
-                    byte[] oldChecksumIP = packet.getByteArray(14, 33);
+                    byte[] oldChecksumIP = NetworkHandler.getInstance().getBytes(packetBytes, 14, 33);
                     boolean newCheckSumIP = Checksum.checkChecksum(oldChecksumIP);
                     if (!newCheckSumIP) {
                         packet = null;
                         //drop packet
                         //finish
                     }
-
                     //ip header check sum
-
 
                     //udp total
                     short tempUDPTotal;
-                    tempUDPTotal = (short) (ip.length() - (newPayload.length - udp.getPayload().length));
+                    tempUDPTotal = (short) (ip.length() - (mainPayload.length - newPayload.length));
 
                     byte[] udpTotal;
                     udpTotal = ByteBuffer.allocate(2).putShort(tempUDPTotal).array();
-                    packet.setByteArray(38, udpTotal);
+                    System.arraycopy(udpTotal, 0, byteBuffers, 38, udpTotal.length);
                     //udp total
 
                     //udp header check sum
-                    System.out.println("totlal size is : " + packet.size());
                     byte[] oldChecksumUdp;
-                    oldChecksumUdp = packet.getByteArray(34, packet.size());
+                    oldChecksumUdp = NetworkHandler.getInstance().getBytes(packetBytes, 34, packetBytes.length);
                     boolean newCheckSumUdp = Checksum.checkChecksum(oldChecksumUdp);
                     if (!newCheckSumUdp) {
                         //drop packet
                         packet = null;
                     }
-
                     //udp header check sum
-                    System.out.println(packet);
-
-
                 }
 
 

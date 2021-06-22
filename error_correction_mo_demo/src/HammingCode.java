@@ -232,7 +232,7 @@ public class HammingCode {
         byte[] aBytes = new byte[(ar.length/8)+1];
         aBytes = converter(ar);
 
-        print(ar);
+//        print(ar);
 
         return aBytes;
     }
@@ -260,7 +260,7 @@ public class HammingCode {
         byte[] aBytes = new byte[(ar.length/8)+1];
         aBytes = converter(ar);
 
-        print(ar);
+//        print(ar);
 
         return aBytes;
     }

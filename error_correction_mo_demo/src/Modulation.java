@@ -16,7 +16,8 @@ public class Modulation extends Thread {
         this.crcString = crcString;
     }
 
-    private synchronized void receiveFrameAndModulation() {
+    private void receiveFrameAndModulation() {
+
         StringBuilder errbuf = new StringBuilder();
         NetworkHandler.getInstance().pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
             Udp udp = new Udp();
@@ -31,6 +32,7 @@ public class Modulation extends Thread {
 
 
                 if (packet.hasHeader(ip) && packet.hasHeader(udp) && packet.hasHeader(ethernet)) {
+                    System.out.println("*********************************Modulation*************************************");
                     counter++;
                     sIP = packet.getHeader(ip).source();
                     sourceIP = org.jnetpcap.packet.format.FormatUtils.ip(sIP);

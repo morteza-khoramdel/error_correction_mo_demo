@@ -356,13 +356,10 @@ class ArrayConverter {
 
     public static byte[] stringToBinary(String s) {
         byte[] bytes = new byte[s.length()];
-        for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) == '1') {
-                bytes[i] = 1;
-            } else {
-                bytes[i] = 0;
-            }
-
+        int k = 0;
+        for (int i = 0; i < s.length(); i+=8) {
+            bytes[k] = Byte.parseByte(s.substring(i, i + 8));
+            k++;
         }
         return bytes;
     }

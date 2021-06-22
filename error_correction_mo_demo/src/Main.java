@@ -17,9 +17,9 @@ public class Main {
             NetworkHandler.getInstance().init();
             HammingCode hammingCode = new HammingCode();
             Modulation modulation = new Modulation(hammingCode, crcString);
-            modulation.run();
-//            DeModulation deModulation = new DeModulation(hammingCode, crcString);
-//            deModulation.run();
+            modulation.start();
+            DeModulation deModulation = new DeModulation(hammingCode, crcString);
+            deModulation.start();
         } catch (Exception e) {
             System.out.println(e.toString());
         }
