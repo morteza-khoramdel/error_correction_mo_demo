@@ -11,16 +11,14 @@ import java.util.List;
 import java.util.Scanner;
 
 
-//TODO
 
-
-public class NetworkHandler {
+class NetworkHandler {
     private static NetworkHandler networkhandler = new NetworkHandler();
     FileWriter myWriter;
     Pcap pcap;
 
 
-    public byte[] src_mac;
+     byte[] src_mac;
 
 
     private NetworkHandler() {

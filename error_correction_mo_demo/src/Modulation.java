@@ -9,12 +9,14 @@ import java.nio.ByteBuffer;
 public class Modulation extends Thread {
     private int counter = 0;
     private HammingCode hammingCode;
+    private String crcString;
 
-    Modulation(HammingCode hammingCode) {
+    Modulation(HammingCode hammingCode, String crcString) {
         this.hammingCode = hammingCode;
+        this.crcString = crcString;
     }
 
-    private synchronized void receiveFrameAndModulation(HammingCode hammingCode) {
+    private synchronized void receiveFrameAndModulation() {
         StringBuilder errbuf = new StringBuilder();
         NetworkHandler.getInstance().pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
             Udp udp = new Udp();
@@ -35,10 +37,12 @@ public class Modulation extends Thread {
                     dIP = packet.getHeader(ip).destination();
                     destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
                     System.out.println(packet);
+
+
                     byte[] packetBytes = NetworkHandler.getInstance().getBytes(packet.getByteArray(0, packet.size()), 0, packet.size());
                     byte[] newPayload = hammingCode.modulatorDriver(udp.getPayload());
                     int append = (newPayload.length - udp.getPayload().length);
-                    byte[] byteBuffers = new byte[packet.size() + append];
+                    byte[] byteBuffers = new byte[packet.size() + append + crcString.length() - 1];
                     System.arraycopy(packet.getByteArray(0, packet.size()), 0, byteBuffers, 0, packet.size());
                     //udp payload
                     System.arraycopy(newPayload, 0, byteBuffers, 42, newPayload.length);
@@ -65,7 +69,7 @@ public class Modulation extends Thread {
 
                     //udp total
                     short tempUDPTotal;
-                    tempUDPTotal = (short) (ip.length() + (newPayload.length - udp.getPayload().length));
+                    tempUDPTotal = (short) (udp.length() + (newPayload.length - udp.getPayload().length));
 
                     byte[] udpTotal;
                     udpTotal = ByteBuffer.allocate(2).putShort(tempUDPTotal).array();
@@ -73,7 +77,6 @@ public class Modulation extends Thread {
                     //udp total
 
                     //udp header check sum
-                    System.out.println("totlal size is : " + packet.size());
                     byte[] oldChecksumUdp;
 
                     oldChecksumUdp = NetworkHandler.getInstance().getBytes(packetBytes, 34, packetBytes.length);
@@ -83,6 +86,13 @@ public class Modulation extends Thread {
                     byte[] byteNewCheckSumUdp = ByteBuffer.allocate(2).putShort(newCheckSumUdp).array();
                     System.arraycopy(byteNewCheckSumUdp, 0, byteBuffers, 40, byteNewCheckSumUdp.length);
                     //udp header check sum
+
+
+                    //CRC
+                    CRC crc = new CRC();
+                    byte[] crcBytes = ArrayConverter.stringToBinary(crc.crcDriver(byteBuffers, crcString));
+                    System.arraycopy(crcBytes, 0, byteBuffers, packet.size() + append, crcBytes.length);
+                    //CRC
                     NetworkHandler.getInstance().sendFrame(byteBuffers, ethernet);
                     byteBuffers = null;
                     packetBytes = null;
@@ -110,6 +120,6 @@ public class Modulation extends Thread {
     @Override
     public void run() {
         super.run();
-        receiveFrameAndModulation(hammingCode);
+        receiveFrameAndModulation();
     }
 }

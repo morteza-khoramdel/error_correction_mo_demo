@@ -1,9 +1,7 @@
-import java.util.Scanner;
-
 public class CRC
 {
 
-    public String xorOper(String temp, String g)
+    private String xorOper(String temp, String g)
     {
         int j;
         int k;

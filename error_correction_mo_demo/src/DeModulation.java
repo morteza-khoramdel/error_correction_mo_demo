@@ -10,12 +10,14 @@ public class DeModulation extends Thread {
 
     private int counter = 0;
     private HammingCode hammingCode;
+    private String crcString;
 
-    DeModulation(HammingCode hammingCode) {
+    DeModulation(HammingCode hammingCode, String crcString) {
+        this.crcString = crcString;
         this.hammingCode = hammingCode;
     }
 
-    private synchronized void deModulationAndSendUpper(HammingCode hammingCode) {
+    private synchronized void deModulationAndSendUpper() {
         StringBuilder errbuf = new StringBuilder();
         NetworkHandler.getInstance().pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
             Udp udp = new Udp();
@@ -36,13 +38,13 @@ public class DeModulation extends Thread {
                     dIP = packet.getHeader(ip).destination();
                     destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
                     System.out.println(packet);
-                    //TODO DEMODULATION
 
+
+                    byte[] packetBytes = NetworkHandler.getInstance().getBytes(packet.getByteArray(0, packet.size()), 0, packet.size());
                     byte[] newPayload = hammingCode.demodulatorDriver(udp.getPayload());
-
-                    ByteBuffer byteBuffers = ByteBuffer.allocate(packet.size() - (newPayload.length - udp.getPayload().length));
-                    packet.setByteBuffer(packet.size() - (newPayload.length - udp.getPayload().length) ,byteBuffers);
-                    packet.setSize(packet.size() - (newPayload.length - udp.getPayload().length));
+                    int append = (newPayload.length - udp.getPayload().length);
+                    byte[] byteBuffers = new byte[packet.size() - append - crcString.length() + 1];
+                    System.arraycopy(packet.getByteArray(0, packet.size()), 0, byteBuffers, 0, packet.size());
                     //udp payload
                     packet.setByteArray(42, newPayload);
                     //udp payload
@@ -59,7 +61,8 @@ public class DeModulation extends Thread {
                     //ip header check sum
                     byte[] oldChecksumIP = packet.getByteArray(14, 33);
                     boolean newCheckSumIP = Checksum.checkChecksum(oldChecksumIP);
-                    if(!newCheckSumIP) {
+                    if (!newCheckSumIP) {
+                        packet = null;
                         //drop packet
                         //finish
                     }
@@ -79,11 +82,11 @@ public class DeModulation extends Thread {
                     //udp header check sum
                     System.out.println("totlal size is : " + packet.size());
                     byte[] oldChecksumUdp;
-                    oldChecksumUdp = packet.getByteArray(34, packet.size() );
+                    oldChecksumUdp = packet.getByteArray(34, packet.size());
                     boolean newCheckSumUdp = Checksum.checkChecksum(oldChecksumUdp);
-                    if(!newCheckSumUdp){
+                    if (!newCheckSumUdp) {
                         //drop packet
-                        //finish
+                        packet = null;
                     }
 
                     //udp header check sum
@@ -95,7 +98,7 @@ public class DeModulation extends Thread {
 
             } catch (Exception e) {
                 try {
-
+                    System.out.println("Packet Drop");
                     NetworkHandler.getInstance().myWriter.write(e.getMessage() + "\n");
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -113,6 +116,6 @@ public class DeModulation extends Thread {
     @Override
     public void run() {
         super.run();
-        deModulationAndSendUpper(hammingCode);
+        deModulationAndSendUpper();
     }
 }

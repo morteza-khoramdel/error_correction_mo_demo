@@ -1,8 +1,8 @@
 /**
  * TLS-Attacker - A Modular Penetration Testing Framework for TLS
- *
+ * <p>
  * Copyright 2014-2016 Ruhr University Bochum / Hackmanit GmbH
- *
+ * <p>
  * Licensed under Apache License 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  */
@@ -352,5 +352,18 @@ class ArrayConverter {
         output[5] = (byte) input;
 
         return output;
+    }
+
+    public static byte[] stringToBinary(String s) {
+        byte[] bytes = new byte[s.length()];
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '1') {
+                bytes[i] = 1;
+            } else {
+                bytes[i] = 0;
+            }
+
+        }
+        return bytes;
     }
 }
