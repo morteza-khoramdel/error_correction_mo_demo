@@ -44,9 +44,8 @@ public class DeModulation extends Thread {
                     byte[] newPayload = hammingCode.demodulatorDriver(udp.getPayload());
                     int append = (newPayload.length - udp.getPayload().length);
                     byte[] byteBuffers = new byte[packet.size() - append - crcString.length() + 1];
-                    System.arraycopy(packet.getByteArray(0, packet.size()), 0, byteBuffers, 0, packet.size());
                     //udp payload
-                    packet.setByteArray(42, newPayload);
+                    System.arraycopy(newPayload, 0, byteBuffers, 42, newPayload.length);
                     //udp payload
 
 
