@@ -18,7 +18,7 @@ public class DeModulation extends Thread {
 
     private  void deModulationAndSendUpper() {
         StringBuilder errbuf = new StringBuilder();
-        NetworkHandler.getInstance().pcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
+        NetworkHandler.getInstance().loopBackPcap.loop(-1, (JPacketHandler<StringBuilder>) (packet, ss) -> {
             Udp udp = new Udp();
             Ip4 ip = new Ip4();
             Ethernet ethernet = new Ethernet();
@@ -49,8 +49,8 @@ public class DeModulation extends Thread {
                     CRC32 crc = new CRC32();
                     crc.update(packetBytes);
 
-                    if(crc.getValue() == 0){
-                        System.out.println("CRC Checked");
+                    if(crc.getValue() != 0){
+                        System.out.println("CRC32 Checked");
                     }else {
                         System.out.println("Packet Droped");
 

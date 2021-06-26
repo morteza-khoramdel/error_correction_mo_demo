@@ -1,4 +1,4 @@
-public class CRC {
+public class CRC32 {
 
     private String xorOper(String temp, String g) {
         int j;

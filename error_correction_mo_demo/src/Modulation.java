@@ -89,15 +89,15 @@ public class Modulation extends Thread {
                     //udp header check sum
 
 
-                    //CRC
+                    //CRC32
                     CRC32 crc = new CRC32();
                     crc.update(byteBuffers);
 
-                    byte[] crcBytes = longToBytes(crc.getValue());
+                    byte[] crcBytes = intToBytes((int) crc.getValue());
 
-                    System.arraycopy(crcBytes, 0, byteBuffers, packet.size() + append, crcBytes.length);
-                    //CRC
-                    NetworkHandler.getInstance().sendFrame(byteBuffers, ethernet);
+                    System.arraycopy(crcBytes, 0, byteBuffers, byteBuffers.length - 4, crcBytes.length);
+                    //CRC32
+                    NetworkHandler.getInstance().sendFrameForLoopBack(byteBuffers, ethernet);
                     byteBuffers = null;
                     packetBytes = null;
                     packet = null;
@@ -122,9 +122,9 @@ public class Modulation extends Thread {
     }
 
 
-    public byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
+    public byte[] intToBytes(int x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        buffer.putInt(x);
         return buffer.array();
     }
     @Override

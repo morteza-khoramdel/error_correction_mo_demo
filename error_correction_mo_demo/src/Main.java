@@ -1,7 +1,8 @@
 public class Main {
     public static void main(String[] args) {
         try {
-            NetworkHandler.getInstance().init();
+            NetworkHandler.getInstance().initForAll();
+            NetworkHandler.getInstance().initForUdpSafe();
             HammingCode hammingCode = new HammingCode();
             Modulation modulation = new Modulation(hammingCode);
             modulation.start();
