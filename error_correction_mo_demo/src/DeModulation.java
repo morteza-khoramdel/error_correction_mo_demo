@@ -11,10 +11,8 @@ public class DeModulation extends Thread {
 
     private int counter = 0;
     private HammingCode hammingCode;
-    private String crcString;
 
-    DeModulation(HammingCode hammingCode, String crcString) {
-        this.crcString = crcString;
+    DeModulation(HammingCode hammingCode) {
         this.hammingCode = hammingCode;
     }
 

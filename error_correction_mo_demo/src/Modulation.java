@@ -10,11 +10,9 @@ import java.util.zip.CRC32;
 public class Modulation extends Thread {
     private int counter = 0;
     private HammingCode hammingCode;
-    private String crcString;
 
-    Modulation(HammingCode hammingCode, String crcString) {
+    Modulation(HammingCode hammingCode) {
         this.hammingCode = hammingCode;
-        this.crcString = crcString;
     }
 
     private void receiveFrameAndModulation() {
@@ -45,7 +43,7 @@ public class Modulation extends Thread {
                     byte[] packetBytes = NetworkHandler.getInstance().getBytes(packet.getByteArray(0, packet.size()), 0, packet.size());
                     byte[] newPayload = hammingCode.modulatorDriver(udp.getPayload());
                     int append = (newPayload.length - udp.getPayload().length);
-                    byte[] byteBuffers = new byte[packet.size() + append + crcString.length() - 1];
+                    byte[] byteBuffers = new byte[packet.size() + append + 3];
                     System.arraycopy(packet.getByteArray(0, packet.size()), 0, byteBuffers, 0, packet.size());
                     //udp payload
                     System.arraycopy(newPayload, 0, byteBuffers, 42, newPayload.length);
