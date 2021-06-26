@@ -41,25 +41,24 @@ public class DeModulation extends Thread {
                     destIP = org.jnetpcap.packet.format.FormatUtils.ip(dIP);
                     System.out.println(packet);
 
+                    byte[] packetBytes = NetworkHandler.getInstance().getBytes(packet.getByteArray(0, packet.size()), 0, packet.size());
+
+                    byte[] mainPayload = new byte[udp.getPayloadLength() - 4];
+                    System.arraycopy(udp.getPayload(), 0, mainPayload, 0, mainPayload.length);
+
 ////////////////////////////////////////////////////////////////////////////Specify the byteBuffers in demodulator
                     //crc for demodulation
                     CRC32 crc = new CRC32();
-                    crc.update(byteBuffers);
+                    crc.update(packetBytes);
 
-                    byte[] crcBytes = longToBytes(crc.getValue());
-
-                    System.arraycopy(crcBytes, 0, byteBuffers, packet.size() + append, crcBytes.length);
                     if(crc.getValue() == 0){
-                        System.out.println("Continue");
+                        System.out.println("CRC Checked");
                     }else {
                         System.out.println("Packet Droped");
 
                     }
 /////////////////////////////////////////////////////////////////////////////
-                    byte[] packetBytes = NetworkHandler.getInstance().getBytes(packet.getByteArray(0, packet.size()), 0, packet.size());
 
-                    byte[] mainPayload = new byte[udp.getPayloadLength() - crcBytes.length];
-                    System.arraycopy(udp.getPayload(), 0, mainPayload, 0, mainPayload.length);
 
                     byte[] newPayload = hammingCode.demodulatorDriver(mainPayload);
                     int append = (mainPayload.length - newPayload.length);
