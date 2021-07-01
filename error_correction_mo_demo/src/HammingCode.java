@@ -12,12 +12,13 @@ public class HammingCode {
     }
 
     // calculating value of redundant bits
-    // r is number of redundant bits
+    // p is number of redundant bits
     // ar is new array with hamming bits
-    static int[] calculation(int[] ar, int r)
+
+    static int[] calculation(int[] ar, int p)
     {
 
-        for (int i = 0; i < r; i++) {
+        for (int i = 0; i < p; i++) {
             // x is 2^i every moment
             int x = (int)Math.pow(2, i);
             // for 1 to final
@@ -33,9 +34,9 @@ public class HammingCode {
         return ar;
     }
 
-    static int[] generateCode(String str, int M, int r)
+    static int[] generateCode(String str, int M, int p)
     {
-        int[] ar = new int[r + M + 1];
+        int[] ar = new int[p + M + 1];
         int j = 0;
         for (int i = 1; i < ar.length; i++) {
             if ((Math.ceil(Math.log(i) / Math.log(2))
@@ -58,7 +59,7 @@ public class HammingCode {
         return ar;
     }
 
-    static int[] degenerateCode(String str, int M, int r)
+    static int[] degenerateCode(String str, int M, int p)
     {
         int[] ar = new int[M + 1];
         int j = 1;
@@ -67,9 +68,9 @@ public class HammingCode {
         int error = 0;
         int counter = 0;
 
-        int parities[] = new int[r];
+        int parities[] = new int[p];
 //detect fault
-        for (int i = 0; i < r; i++) {
+        for (int i = 0; i < p; i++) {
             int position = (int)Math.pow(2,i);
             for (int k = position; k < str.length(); k += 2 * position) {
                 for(int y = k ; y < k + position ; y++){
@@ -80,20 +81,20 @@ public class HammingCode {
             }
         }
 
-        for (int i = 0 ; i < r ; i++){
+        for (int i = 0 ; i < p ; i++){
             if(parities[i] == 0){
                 counter++;
             }else {
                 break;
             }
         }
-        if(counter == r){
+        if(counter == p){
             // we are good
             error = 0;
         }else{
             // :)
             int epos = 0;
-            for(int i = r-1 ; i > -1 ; i--){
+            for(int i = p-1 ; i > -1 ; i--){
                 epos = epos + (parities[i] * (int)Math.pow(2,i));
             }
             error = epos;
@@ -206,11 +207,8 @@ public class HammingCode {
     // Driver code
     public byte[] modulatorDriver(byte[] strb)
     {
-
-
         // input message
         String str = "";
-
 
         for(int i = 0 ; i < strb.length ; i++) {
             str = str.concat(String.format("%8s", Integer.toBinaryString(strb[i] & 0xFF)).replace(' ', '0'));
@@ -218,16 +216,16 @@ public class HammingCode {
         }
 
         int M = str.length();
-        int r = 1;
+        int p = 1;
 
-        while (Math.pow(2, r) < (M + r + 1)) {
-            // r is number of redundant bits
-            r++;
+        while (Math.pow(2, p) < (M + p + 1)) {
+            // p is number of redundant bits
+            p++;
         }
-        int[] ar = generateCode(str, M, r);
+        int[] ar = generateCode(str, M, p);
 
         System.out.println("Generated hamming code ");
-        ar = calculation(ar, r);
+        ar = calculation(ar, p);
 
         byte[] aBytes = new byte[(ar.length/8)+1];
         aBytes = converter(ar);
@@ -251,10 +249,10 @@ public class HammingCode {
         }
 
 
-        int r = (int) (Math.ceil(Math.log(str.length()) / Math.log(2)));
-        int M = str.length() - r;
+        int p = (int) (Math.ceil(Math.log(str.length()) / Math.log(2)));
+        int M = str.length() - p;
 
-        int[] ar = degenerateCode(str, M, r);
+        int[] ar = degenerateCode(str, M, p);
         System.out.println("Degenerated hamming code ");
 
         byte[] aBytes = new byte[(ar.length/8)+1];
