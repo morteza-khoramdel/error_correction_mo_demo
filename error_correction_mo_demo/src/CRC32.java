@@ -1,5 +1,4 @@
 public class CRC32 {
-
     private String xorOper(String temp, String g) {
         int j;
         int k;
@@ -80,20 +79,4 @@ public class CRC32 {
             System.out.print("\n Since Remainder Is Not 0 Hence Message Transmitted From Sender To Receiver Contains Error");
         return rem;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

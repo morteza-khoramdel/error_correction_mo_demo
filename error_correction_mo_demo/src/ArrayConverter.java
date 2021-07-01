@@ -1,9 +1,5 @@
 /**
  * TLS-Attacker - A Modular Penetration Testing Framework for TLS
- * <p>
- * Copyright 2014-2016 Ruhr University Bochum / Hackmanit GmbH
- * <p>
- * Licensed under Apache License 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
@@ -11,9 +7,6 @@ import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.List;
 
-/**
- * @author Juraj Somorovsky <juraj.somorovsky@rub.de>
- */
 class ArrayConverter {
 
     /**

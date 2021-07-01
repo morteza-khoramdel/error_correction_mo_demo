@@ -165,6 +165,4 @@ class NetworkHandler {
         System.arraycopy(bytesA, start, bytesFinal, 0, bytesFinal.length);
         return bytesFinal;
     }
-
-
 }
