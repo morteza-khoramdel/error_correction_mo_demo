@@ -27,7 +27,7 @@ public class HammingCode {
                         ar[x] = ar[x] ^ ar[j];
                 }
             }
-            System.out.println("r" + x + " = " + ar[x]);
+            System.out.println("p" + x + " = " + ar[x]);
         }
 
         return ar;

@@ -1,7 +1,3 @@
-/**
- * TLS-Attacker - A Modular Penetration Testing Framework for TLS
- * http://www.apache.org/licenses/LICENSE-2.0
- */
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
